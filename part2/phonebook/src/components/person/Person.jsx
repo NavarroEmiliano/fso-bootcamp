@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
-const Person = ({ name, number }) => {
+const Person = ({id, name, number ,removeNumber}) => {
   return (
     <div key={name}>
       <span>{name} </span>
       <span>{number}</span>
+      <button onClick={()=>removeNumber(id,name)}>Delete</button>
     </div>
   );
 };

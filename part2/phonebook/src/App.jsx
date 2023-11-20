@@ -3,7 +3,7 @@ import "./App.css";
 import Numbers from "./components/numbers/Numbers";
 import SearchBar from "./components/searchbar/SearchBar";
 import Form from "./components/form/Form";
-import axios from "axios";
+import personsService from "./services/persons";
 
 function App() {
   const [persons, setPersons] = useState([]);
@@ -19,12 +19,6 @@ function App() {
     setNewNumber(event.target.value);
   };
 
-  const personsFiltered = !nameFilter
-    ? persons
-    : persons.filter((person) =>
-        person.name.toLowerCase().includes(nameFilter.toLowerCase())
-      );
-
   const handleFilter = (event) => {
     setNameFilter(event.target.value);
   };
@@ -36,23 +30,65 @@ function App() {
       number: newNumber,
     };
     if (persons.some(({ name }) => name === nameObject.name)) {
-      alert(`${newName} is already added to phonebook`);
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const person = persons.find(
+          (person) => person.name === nameObject.name
+        );
+        const newPersonObject = { ...person, number: newNumber };
+
+        personsService
+          .updatePerson(newPersonObject)
+          .then((updatedPerson) => {
+            const personsFilter = persons.map((person) =>
+              person.id !== newPersonObject.id ? person : updatedPerson
+            );
+            setPersons(personsFilter);
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch((error) => console.log(error.message));
+      }
     } else {
-      setPersons(persons.concat(nameObject));
-      setNewName("");
-      setNewNumber("");
+      personsService
+        .addPerson(nameObject)
+        .then((newPerson) => {
+          setPersons(persons.concat(newPerson));
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((error) => console.log(error.message));
     }
   };
 
-  const hook = () => {
-    axios
-    .get("http://localhost:3001/persons")
-    .then((response) => {
-      setPersons(response.data);
-    });
+  const removeNumber = (id, name) => {
+    if (window.confirm(`Delete ${name}`)) {
+      personsService
+        .removePerson(id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+        })
+        .catch((error) => console.log(error.message));
+    }
   };
 
-  useEffect(hook, []);
+  const personsFiltered = !nameFilter
+    ? persons
+    : persons.filter((person) =>
+        person.name.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+
+  useEffect(() => {
+    personsService
+      .getAll()
+      .then((allPersons) => {
+        setPersons(allPersons);
+      })
+      .catch((error) => console.log(error.message));
+  }, []);
 
   return (
     <div>
@@ -67,7 +103,7 @@ function App() {
         newNumber={newNumber}
       />
 
-      <Numbers persons={personsFiltered} />
+      <Numbers persons={personsFiltered} removeNumber={removeNumber} />
     </div>
   );
 }
