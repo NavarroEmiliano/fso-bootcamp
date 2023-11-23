@@ -4,12 +4,14 @@ import Numbers from "./components/numbers/Numbers";
 import SearchBar from "./components/searchbar/SearchBar";
 import Form from "./components/form/Form";
 import personsService from "./services/persons";
+import Notification from "./components/notification/Notification";
 
 function App() {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
+  const [notification, setNotification] = useState(null);
 
   const handleNewNameChange = (event) => {
     setNewName(event.target.value);
@@ -47,16 +49,39 @@ function App() {
               person.id !== newPersonObject.id ? person : updatedPerson
             );
             setPersons(personsFilter);
+            setNotification({
+              message: `Updated ${newPersonObject.name} number`,
+              status: "resolve",
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 5000);
             setNewName("");
             setNewNumber("");
           })
-          .catch((error) => console.log(error.message));
+          .catch((error) => {
+            setNotification({
+              message: `Information of ${newName} has already been removed from server`,
+              status: "rejected",
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 5000);
+            console.log(error.message);
+          });
       }
     } else {
       personsService
         .addPerson(nameObject)
         .then((newPerson) => {
           setPersons(persons.concat(newPerson));
+          setNotification({
+            message: `Added ${newPerson.name}`,
+            status: "resolve",
+          });
+          setTimeout(() => {
+            setNotification(null);
+          }, 5000);
           setNewName("");
           setNewNumber("");
         })
@@ -71,7 +96,16 @@ function App() {
         .then(() => {
           setPersons(persons.filter((person) => person.id !== id));
         })
-        .catch((error) => console.log(error.message));
+        .catch((error) => {
+          setNotification({
+            message: `the person ${name} does not exist in the database`,
+            status: "rejected",
+          });
+          setTimeout(() => {
+            setNotification(null);
+          }, 5000);
+          console.log(error.message);
+        });
     }
   };
 
@@ -93,6 +127,7 @@ function App() {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification notification={notification} />
       <SearchBar handler={handleFilter} />
 
       <Form
