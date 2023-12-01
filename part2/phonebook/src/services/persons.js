@@ -1,24 +1,28 @@
 import axios from "axios";
-const URL = "http://localhost:3001/persons";
+const URL = "/api/persons";
 
-const getAll = () => {
+const getAll = async () => {
   const request = axios.get(URL);
-  return request.then((response) => response.data);
+  const response = await request;
+  return response.data;
 };
 
-const addPerson = (body) => {
+const addPerson = async (body) => {
   const request = axios.post(URL, body);
-  return request.then((response) => response.data);
+  const response = await request;
+  return response.data;
 };
 
-const removePerson = (id) => {
+const removePerson = async (id) => {
   const request = axios.delete(`${URL}/${id}`);
-  return request.then((response) => response.data);
+  const response = await request;
+  return response.data;
 };
 
-const updatePerson = (personUpdate) =>{
+const updatePerson = async (personUpdate) =>{
 const request = axios.put(`${URL}/${personUpdate.id}`, personUpdate)
-return request.then(response=> response.data)
+  const response = await request;
+  return response.data;
 }
 
 export default {
