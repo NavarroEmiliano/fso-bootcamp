@@ -1,22 +1,25 @@
-import { useState } from "react";
 import "./App.css";
 import Statistics from "./components/statistics/Statistics";
 import Button from "./components/button/Button";
+import { useDispatch } from "react-redux";
 
 function App() {
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
+  const dispatch = useDispatch()
+
 
   const handleClickGood = () => {
-    setGood(good + 1);
+    dispatch({type:'GOOD'})
   };
   const handleClickNeutral = () => {
-    setNeutral(neutral + 1);
+    dispatch({type:'OK'})
   };
   const handleClickBad = () => {
-    setBad(bad + 1);
+    dispatch({type:'BAD'})
   };
+
+  const handleResetAll = () =>{
+    dispatch({type:'ZERO'})
+  }
 
 
   return (
@@ -25,7 +28,8 @@ function App() {
       <Button handler={handleClickGood} text="Good"/>
       <Button handler={handleClickNeutral} text="Neutral"/>
       <Button handler={handleClickBad} text="Bad"/>
-      <Statistics good={good} neutral={neutral} bad={bad} />
+      <Button handler={handleResetAll} text="Reset"/>
+      <Statistics/>
     </div>
   );
 }
