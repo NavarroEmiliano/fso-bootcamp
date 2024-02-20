@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { updateAnecdote } from '../../features/anecdote/anecdoteSlice'
-import { setNotification } from '../../features/notification/notificationSlice'
+import { showNotification } from '../../features/notification/notificationSlice'
 const AnecdoteList = () => {
   const dispatch = useDispatch()
 
@@ -18,10 +18,7 @@ const AnecdoteList = () => {
     const anecdote = unsortedAnecdotes.find(a => a.id === id)
     const notification = `You voted for ${anecdote.content}`
     dispatch(updateAnecdote(anecdote))
-    dispatch(setNotification(notification))
-    setTimeout(() => {
-      dispatch(setNotification(''))
-    }, 5000)
+    dispatch(showNotification(notification, 5))
   }
   return (
     <div>
